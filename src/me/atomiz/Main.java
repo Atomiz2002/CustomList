@@ -5,9 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Consumer;
 
-/**
- * An AtomicState object
- */
 enum AtomicState {
     LIQUID, SOLID, GAS, PLASMA, UNKNOWN
 }
@@ -69,15 +66,12 @@ public class Main {
                 .insert(0, new Atom("added2"))
                 .println().print("\n- Removing the element at index 5")
                 .remove(5)
-                .println().print("\n- Renaming all elements")
-                .forEach(atom -> atom.name = "edited*")
-                .println().print("\nThe End");
+                .println().print("\n- Replacing all names with edited")
+                .forEach(atom -> atom.name = "edited")
+                .println();
     }
 }
 
-/**
- * An Atom object
- */
 class Atom {
 
     String name;
@@ -88,8 +82,8 @@ class Atom {
     double meltingPoint;
 
     /**
-     * Creates an empty instance of an {@link Atom} with a default name of null and values defaulting to 0 and an {@link AtomicState#UNKNOWN
-     * AtomicState.UNKNOWN}
+     * Creates an empty instance of an {@link Atom} with a default name of "atom" and values defaulting to 0 and an
+     * {@link AtomicState#UNKNOWN}.
      */
     public Atom() {
         this.name = "atom";
@@ -101,7 +95,7 @@ class Atom {
     }
 
     /**
-     * Creates an empty instance of an Atom with the specified name
+     * Creates an empty instance of an Atom with the specified name.
      *
      * @param name The name
      */
@@ -115,7 +109,7 @@ class Atom {
     }
 
     /**
-     * Create a new instance of an {@link Atom}
+     * Create a new instance of an {@link Atom}.
      *
      * @param name         The name
      * @param number       The atomic number
@@ -164,20 +158,25 @@ class Atom {
 }
 
 /**
- * A custom list of a given type
+ * A custom list with specified elements of a given type.
  *
- * @param <Element> The type
+ * @param <Element> the type
  */
 class Atoms<Element> {
     Object[] atoms;
 
     /**
-     * Creates an empty list with initial size of 0
+     * Creates an empty list with initial size of 0.
      */
     public Atoms() {
         atoms = new Object[0];
     }
 
+    /**
+     * Creates a new empty list with all the elements of the specified collection.
+     *
+     * @param collection the collection
+     */
     public Atoms(Collection<Element> collection) {
         atoms = collection.toArray();
     }
@@ -187,8 +186,10 @@ class Atoms<Element> {
     }
 
     /**
-     * @param e The element to count
-     * @return The amount of occurrences of the specified element in the list
+     * Counts the amount of occurrences of the specified element in the list.
+     *
+     * @param e the element to count
+     * @return the count
      */
     public int count(Element e) {
         int size = 0;
@@ -200,8 +201,10 @@ class Atoms<Element> {
     }
 
     /**
-     * @param e The element to check the list for
-     * @return true if the list contains the specified element
+     * Checks if the list contains the specified element.
+     *
+     * @param e the element
+     * @return {@code true} if the list contains the specified element
      */
     public boolean contains(Element e) {
         for (Object a : atoms)
@@ -213,8 +216,11 @@ class Atoms<Element> {
     }
 
     /**
-     * @param e The element to get the index of in the list
-     * @return The index of the specified element in the list
+     * Retrieves the index of the specified element in the list.
+     *
+     * @param e the element
+     * @return The index
+     * @see Atoms#lastIndexOf(Object) 
      */
     public int indexOf(Element e) {
         for (int i = 0; i < atoms.length; i++)
@@ -227,8 +233,11 @@ class Atoms<Element> {
     }
 
     /**
-     * @param e The element to get the last index of in the list
-     * @return The last index of the specified element in the list
+     * Retrieves the index of the last occurrence of the specified element in the list.
+     *
+     * @param e the element
+     * @return its last index
+     * @see Atoms#indexOf(Object)
      */
     public int lastIndexOf(Element e) {
         for (int i = atoms.length - 1; i >= 0; i--) {
@@ -242,8 +251,10 @@ class Atoms<Element> {
     }
 
     /**
-     * @param i The index of the element to get from the list
-     * @return The element located at the specified index in the list
+     * Gets the element located at the specified index.
+     *
+     * @param i the index
+     * @return the element
      */
     @SuppressWarnings("unchecked")
     public Element get(int i) {
@@ -251,8 +262,12 @@ class Atoms<Element> {
     }
 
     /**
-     * @param e The element to add to the list
-     * @return The modified list
+     * Adds the specified element to the list.
+     *
+     * @param e the element
+     * @return the modified list
+     * @see Atoms#addAll(Object[])
+     * @see Atoms#addAll(Collection)
      */
     public Atoms<Element> add(Element e) {
         atoms = Arrays.copyOf(atoms, atoms.length + 1);
@@ -262,8 +277,12 @@ class Atoms<Element> {
     }
 
     /**
-     * @param e The array of elements to add to the list
-     * @return The modified list
+     * Adds the elements of the specified {@link Arrays Array} to the list.
+     *
+     * @param e the {@link Arrays array} of elements
+     * @return the modified list
+     * @see Atoms#add(Object)
+     * @see Atoms#addAll(Collection)
      */
     public Atoms<Element> addAll(Element[] e) {
         Arrays.stream(e).forEach(this::add);
@@ -272,8 +291,12 @@ class Atoms<Element> {
     }
 
     /**
-     * @param e The {@link Collection Collection} of elements to add to the list
-     * @return The modified list
+     * Adds the elements of the specified {@link Collection} to the list.
+     *
+     * @param e the {@link Collection Collection}
+     * @return the modified list
+     * @see Atoms#add(Object)
+     * @see Atoms#addAll(Object[])
      */
     public Atoms<Element> addAll(@NotNull Collection<Element> e) {
         e.forEach(this::add);
@@ -282,12 +305,16 @@ class Atoms<Element> {
     }
 
     /**
-     * @param i The index to insert the specified element at
-     * @param e The element to insert at the specified index
-     * @return The modified list
+     * Inserts the specified element at the specified index in the list.
+     *
+     * @param i the index
+     * @param e the element
+     * @return the modified list
+     * @see Atoms#insertAll(int, Object[])
+     * @see Atoms#insertAll(int, Collection)
      */
     public Atoms<Element> insert(int i, Element e) {
-        if (i > atoms.length - 1) throw new ArrayIndexOutOfBoundsException();
+//        if (i > atoms.length - 1) throw new ArrayIndexOutOfBoundsException();
 
         atoms = Arrays.copyOf(atoms, atoms.length + 1);
         System.arraycopy(atoms, i, atoms, i + 1, atoms.length - i - 1);
@@ -297,9 +324,51 @@ class Atoms<Element> {
     }
 
     /**
-     * @param i The index of the element to replace
-     * @param e The element to replace with
-     * @return The modified list
+     * Inserts the elements of the specified {@link Arrays Array} to the list starting from the specified index.
+     *
+     * @param i the index
+     * @param e the element
+     * @return the modified list
+     * @see Atoms#insert(int, Object)
+     * @see Atoms#insertAll(int, Collection)
+     */
+    public Atoms<Element> insertAll(int i, Element[] e) {
+//        if (i > atoms.length - 1) throw new ArrayIndexOutOfBoundsException();
+
+        atoms = Arrays.copyOf(atoms, atoms.length + e.length);
+        System.arraycopy(atoms, i, atoms, i + e.length, atoms.length - i - e.length);
+
+        for (int j = 0; j < e.length; j++)
+            set(i + j, e[j]);
+
+        return this;
+    }
+
+    /**
+     * Inserts the elements of the specified {@link Collection} to the list starting from the specified index.
+     *
+     * @param i the index
+     * @param e the element
+     * @return the modified list
+     * @see Atoms#insert(int, Object)
+     * @see Atoms#insertAll(int, Object[])
+     */
+    @SuppressWarnings("unchecked")
+    public Atoms<Element> insertAll(int i, Collection<Element> e) {
+//        if (i > atoms.length - 1) throw new ArrayIndexOutOfBoundsException();
+
+        insertAll(i, (Element[]) e.toArray());
+
+        return this;
+    }
+
+    /**
+     * Replaces the element at the specified index with the specified element.
+     *
+     * @param i the index
+     * @param e the element
+     * @return the modified list
+     * @see Atoms#set(Object, Object)
      */
     public Atoms<Element> set(int i, Element e) {
         atoms[i] = e;
@@ -308,9 +377,12 @@ class Atoms<Element> {
     }
 
     /**
-     * @param e The element to replace in the list
-     * @param r The element to replace with in the list
-     * @return The modified list
+     * Replaces the first occurrence of the specified element with the specified replacement element.
+     *
+     * @param e the element
+     * @param r the replacement
+     * @return the modified list
+     * @see Atoms#set(int, Object)
      */
     public Atoms<Element> set(Element e, Element r) {
         atoms[indexOf(e)] = r;
@@ -318,10 +390,15 @@ class Atoms<Element> {
     }
 
     /**
-     * Removes the first occurrence of the element at the specified index in the list
+     * Removes the first occurrence of the element at the specified index in the list.
      *
      * @param i The index of the element to remove from the list
      * @return The modified list
+     * @see Atoms#remove(Object)
+     * @see Atoms#removeAll(int)
+     * @see Atoms#removeAll(Object)
+     * @see Atoms#removeLast()
+     * @see Atoms#removeLast(Object)
      */
     public Atoms<Element> remove(int i) {
         remove(get(i));
@@ -330,10 +407,15 @@ class Atoms<Element> {
     }
 
     /**
-     * Removes the first occurrence of the specified element in the list
+     * Removes the first occurrence of the specified element in the list.
      *
      * @param e The element
      * @return The modified list
+     * @see Atoms#remove(int)
+     * @see Atoms#removeAll(int)
+     * @see Atoms#removeAll(Object)
+     * @see Atoms#removeLast()
+     * @see Atoms#removeLast(Object)
      */
     public Atoms<Element> remove(Element e) {
         if (!contains(e)) return this;
@@ -351,10 +433,15 @@ class Atoms<Element> {
     }
 
     /**
-     * Removes all occurrences of the element at the specified index in the list
+     * Removes all occurrences of the element at the specified index in the list.
      *
      * @param i The index of the element
      * @return The modified list
+     * @see Atoms#remove(int)
+     * @see Atoms#remove(Object)
+     * @see Atoms#removeAll(Object)
+     * @see Atoms#removeLast()
+     * @see Atoms#removeLast(Object)
      */
     public Atoms<Element> removeAll(int i) {
         removeAll(get(i));
@@ -363,10 +450,15 @@ class Atoms<Element> {
     }
 
     /**
-     * Removes all occurrences of the specified element in the list
+     * Removes all occurrences of the specified element in the list.
      *
      * @param e The element
      * @return The modified list
+     * @see Atoms#remove(int)
+     * @see Atoms#remove(Object)
+     * @see Atoms#removeAll(int)
+     * @see Atoms#removeLast()
+     * @see Atoms#removeLast(Object)
      */
     public Atoms<Element> removeAll(Element e) {
         while (contains(e))
@@ -376,9 +468,14 @@ class Atoms<Element> {
     }
 
     /**
-     * Removes the last element of the list
+     * Removes the last element of the list.
      *
      * @return The modified list
+     * @see Atoms#remove(int)
+     * @see Atoms#remove(Object)
+     * @see Atoms#removeAll(int)
+     * @see Atoms#removeAll(Object)
+     * @see Atoms#removeLast(Object)
      */
     public Atoms<Element> removeLast() {
         atoms = Arrays.copyOf(atoms, atoms.length - 1);
@@ -387,10 +484,15 @@ class Atoms<Element> {
     }
 
     /**
-     * Removes the last occurrence of the specified element in the list
+     * Removes the last occurrence of the specified element in the list.
      *
-     * @param e The element
-     * @return The modified list
+     * @param e the element
+     * @return the modified list
+     * @see Atoms#remove(int)
+     * @see Atoms#remove(Object)
+     * @see Atoms#removeAll(int)
+     * @see Atoms#removeAll(Object)
+     * @see Atoms#removeLast()
      */
     public Atoms<Element> removeLast(Element e) {
         if (!contains(e)) return this;
@@ -407,11 +509,22 @@ class Atoms<Element> {
         return this;
     }
 
+    /**
+     * Clears the list.
+     *
+     * @return the empty list
+     */
     public Atoms<Element> clear() {
         atoms = new Object[0];
         return this;
     }
 
+    /**
+     * Performs an action on each element.
+     *
+     * @param action the action
+     * @return the modified list
+     */
     @SuppressWarnings("unchecked")
     public Atoms<Element> forEach(Consumer<? super Element> action) {
         Objects.requireNonNull(action);
@@ -422,11 +535,12 @@ class Atoms<Element> {
     }
 
     /**
-     * Prints each element of the list on a new line by replacing the empty values with the specified string
+     * Prints each element of the list on a new line by replacing the empty values with the specified string.
      *
      * @param empty The replacement
      * @return The list
      * @see Atoms#println()
+     * @see Atoms#print(Object)
      */
     public Atoms<Element> println(String empty) {
         for (Object atom : atoms)
@@ -438,10 +552,11 @@ class Atoms<Element> {
     }
 
     /**
-     * Prints each element of the list on a new line
+     * Prints each element of the list on a new line.
      *
-     * @return The list
+     * @return the list
      * @see Atoms#println(String)
+     * @see Atoms#print(Object)
      */
     public Atoms<Element> println() {
         for (Object atom : atoms)
@@ -451,14 +566,14 @@ class Atoms<Element> {
     }
 
     /**
-     * Prints the specified value to the console but still returning the list (mainly used for debugging purposes)
+     * Prints the specified value to the console but still returning the list (mainly used for debugging purposes).
      *
-     * @param value The value
-     * @return The list
+     * @param value the value
+     * @return the list
      * @see Atoms#println()
      * @see Atoms#println(String)
      */
-    public Atoms<Element> print(String value) {
+    public Atoms<Element> print(Object value) {
         System.out.println(value);
 
         return this;
