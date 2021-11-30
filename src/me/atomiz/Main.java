@@ -68,6 +68,8 @@ public class Main {
                 .remove(5)
                 .println().print("\n- Replacing all names with edited")
                 .forEach(atom -> atom.name = "edited")
+                .println().print("\n- The elements between the indexes 1-3")
+                .getRange(1, 3)
                 .println();
     }
 }
@@ -220,7 +222,7 @@ class Atoms<Element> {
      *
      * @param e the element
      * @return The index
-     * @see Atoms#lastIndexOf(Object) 
+     * @see Atoms#lastIndexOf(Object)
      */
     public int indexOf(Element e) {
         for (int i = 0; i < atoms.length; i++)
@@ -251,7 +253,7 @@ class Atoms<Element> {
     }
 
     /**
-     * Gets the element located at the specified index.
+     * Retrieves the element located at the specified index.
      *
      * @param i the index
      * @return the element
@@ -259,6 +261,22 @@ class Atoms<Element> {
     @SuppressWarnings("unchecked")
     public Element get(int i) {
         return (Element) atoms[i];
+    }
+
+    /**
+     * Retrieves the elements located between the specified indexes.
+     *
+     * @param i the start index (inclusive)
+     * @param j the end index (exclusive)
+     * @return the elements
+     */
+    @SuppressWarnings("unchecked")
+    public Atoms<Element> getRange(int i, int j) {
+        Atoms<Element> r = new Atoms<>();
+        for (int k = i; k < j; k++)
+            r.add((Element) atoms[k]);
+
+        return r;
     }
 
     /**
