@@ -59,7 +59,6 @@ class Atom {
 
     @Override
     public String toString() {
-//        if (this == null) return null;
         return name + " - "
                 + number + ", "
                 + state.toString().toLowerCase() + ", "

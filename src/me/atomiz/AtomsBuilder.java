@@ -12,21 +12,21 @@ import java.util.function.Consumer;
  *
  * @param <T> the type
  */
-class Atoms<T> {
-    T[] atoms;
+class AtomsBuilder<T> {
+    T[] builder;
 
     @SuppressWarnings("unchecked")
-    public Atoms() {
-        this.atoms = (T[]) new Object[0];
+    public AtomsBuilder() {
+        this.builder = (T[]) new Object[0];
     }
 
-    public Atoms(T[] array) {
-        atoms = array;
+    public AtomsBuilder(T[] array) {
+        builder = array;
     }
 
     @SuppressWarnings("unchecked")
-    public Atoms(Collection<T> list) {
-        atoms = (T[]) list.toArray();
+    public AtomsBuilder(Collection<T> list) {
+        builder = (T[]) list.toArray();
     }
 
     // region basics
@@ -39,7 +39,7 @@ class Atoms<T> {
      */
     public int count(@NotNull T e) {
         int size = 0;
-        for (T el : atoms)
+        for (T el : builder)
             if (Objects.equals(el, e))
                 size++;
 
@@ -53,7 +53,7 @@ class Atoms<T> {
      * @return {@code true} if the list contains the specified element
      */
     public boolean contains(@NotNull T e) {
-        for (T a : atoms)
+        for (T a : builder)
             if (Objects.equals(a, e))
                 return true;
 
@@ -67,9 +67,9 @@ class Atoms<T> {
      * @return the index of the element or -1
      */
     public int indexOf(T e) {
-        for (int i = 0; i < atoms.length; i++)
-            if (Objects.equals(atoms[i], e))
-                if (atoms[i].equals(e))
+        for (int i = 0; i < builder.length; i++)
+            if (Objects.equals(builder[i], e))
+                if (builder[i].equals(e))
                     return i;
 
         return -1;
@@ -82,8 +82,8 @@ class Atoms<T> {
      * @return the last index of the element or -1
      */
     public int lastIndexOf(T e) {
-        for (int i = atoms.length - 1; i >= 0; i--)
-            if (Objects.equals(atoms[i], e))
+        for (int i = builder.length - 1; i >= 0; i--)
+            if (Objects.equals(builder[i], e))
                 return i;
 
         return -1;
@@ -96,7 +96,7 @@ class Atoms<T> {
      * @return the element
      */
     public T get(int i) {
-        return atoms[i];
+        return builder[i];
     }
 
     /**
@@ -105,7 +105,7 @@ class Atoms<T> {
      * @return the list size
      */
     public int size() {
-        return atoms.length;
+        return builder.length;
     }
 
     /**
@@ -119,21 +119,28 @@ class Atoms<T> {
 
     /**
      * Clears the list.
+     *
+     * @return the modified list
      */
     @SuppressWarnings("unchecked")
-    public void clear() {
-        atoms = (T[]) new Object[0];
+    public AtomsBuilder<T> clear() {
+        builder = (T[]) new Object[0];
+
+        return this;
     }
 
     /**
      * Performs an action on each element.
      *
      * @param action the action
+     * @return the modified list
      */
-    public void forEach(Consumer<? super T> action) {
+    public AtomsBuilder<T> forEach(Consumer<? super T> action) {
         Objects.requireNonNull(action);
-        for (T atom : atoms)
+        for (T atom : builder)
             action.accept(atom);
+
+        return this;
     }
 
     /**
@@ -143,10 +150,10 @@ class Atoms<T> {
      * @param count the end index (exclusive)
      * @return the elements
      */
-    public Atoms<T> getRange(int start, int count) {
-        Atoms<T> result = new Atoms<>();
+    public AtomsBuilder<T> getRange(int start, int count) {
+        AtomsBuilder<T> result = new AtomsBuilder<>();
         for (int k = start; k < count; k++)
-            result.add(atoms[k]);
+            result.add(builder[k]);
 
         return result;
     }
@@ -158,19 +165,23 @@ class Atoms<T> {
      * @param to   the ending index (exclusive) of the sublist
      * @return the elements
      */
-    public Atoms<T> subList(int from, int to) {
-        Atoms<T> result = new Atoms<>();
+    public AtomsBuilder<T> subList(int from, int to) {
+        AtomsBuilder<T> result = new AtomsBuilder<>();
         for (int k = from; k < to; k++)
-            result.add(atoms[k]);
+            result.add(builder[k]);
 
         return result;
     }
 
+    // endregion
+
+    // region print
+
     /**
      * Prints each element of the list on a new line.
      */
-    public void println() {
-        for (T atom : atoms)
+    public void println() { // not returning the list to improve readability when using this method
+        for (T atom : builder)
             System.out.println(atom);
     }
 
@@ -180,7 +191,7 @@ class Atoms<T> {
      * @param replacement The replacement
      */
     public void println(String replacement) {
-        for (T atom : atoms)
+        for (T atom : builder)
             if (atom == null || atom.toString().isEmpty())
                 System.out.println(replacement);
             else
@@ -195,10 +206,13 @@ class Atoms<T> {
      * Adds the specified element to the list.
      *
      * @param e the element
+     * @return the modified list
      */
-    public void add(T e) {
-        atoms = Arrays.copyOf(atoms, atoms.length + 1);
-        atoms[atoms.length - 1] = e;
+    public AtomsBuilder<T> add(T e) {
+        builder = Arrays.copyOf(builder, builder.length + 1);
+        builder[builder.length - 1] = e;
+
+        return this;
     }
 
     /**
@@ -206,29 +220,38 @@ class Atoms<T> {
      *
      * @param index the index
      * @param e     the element
+     * @return the modified list
      */
-    public void add(int index, T e) {
-        atoms = Arrays.copyOf(atoms, atoms.length + 1);
-        System.arraycopy(atoms, index, atoms, index + 1, atoms.length - index - 1);
+    public AtomsBuilder<T> add(int index, T e) {
+        builder = Arrays.copyOf(builder, builder.length + 1);
+        System.arraycopy(builder, index, builder, index + 1, builder.length - index - 1);
         set(index, e);
+
+        return this;
     }
 
     /**
      * Adds the elements of the specified {@link Arrays Array} to the list.
      *
      * @param e the {@link Arrays array} of elements
+     * @return the modified list
      */
-    public void addAll(T[] e) {
+    public AtomsBuilder<T> addAll(T[] e) {
         Arrays.stream(e).forEach(this::add);
+
+        return this;
     }
 
     /**
      * Adds the elements of the specified {@link Collection} to the list.
      *
      * @param e the {@link Collection Collection}
+     * @return the modified list
      */
-    public void addAll(@NotNull Collection<T> e) {
+    public AtomsBuilder<T> addAll(@NotNull Collection<T> e) {
         e.forEach(this::add);
+
+        return this;
     }
 
     /**
@@ -236,13 +259,16 @@ class Atoms<T> {
      *
      * @param index   the index
      * @param element the element
+     * @return the modified list
      */
-    public void addAll(int index, T[] element) {
-        atoms = Arrays.copyOf(atoms, atoms.length + element.length);
-        System.arraycopy(atoms, index, atoms, index + element.length, atoms.length - index - element.length);
+    public AtomsBuilder<T> addAll(int index, T[] element) {
+        builder = Arrays.copyOf(builder, builder.length + element.length);
+        System.arraycopy(builder, index, builder, index + element.length, builder.length - index - element.length);
 
         for (int j = 0; j < element.length; j++)
             set(index + j, element[j]);
+
+        return this;
     }
 
     /**
@@ -250,10 +276,13 @@ class Atoms<T> {
      *
      * @param index      the index
      * @param collection the collection to add
+     * @return the modified list
      */
     @SuppressWarnings("unchecked")
-    public void addAll(int index, Collection<T> collection) {
+    public AtomsBuilder<T> addAll(int index, Collection<T> collection) {
         addAll(index, (T[]) collection.toArray());
+
+        return this;
     }
 
     // endregion
@@ -265,13 +294,12 @@ class Atoms<T> {
      *
      * @param index   the index
      * @param element the element
-     * @return the element previously at this index
+     * @return the modified list
      */
-    public T set(int index, T element) {
-        T prev = atoms[index];
-        atoms[index] = element;
+    public AtomsBuilder<T> set(int index, T element) {
+        builder[index] = element;
 
-        return prev;
+        return this;
     }
 
     /**
@@ -279,13 +307,13 @@ class Atoms<T> {
      *
      * @param element the element to replace
      * @param replace the replacement
-     * @return {@code true} if the list was modified
+     * @return the modified list
      */
-    public boolean set(T element, T replace) {
-        if (!contains(element)) return false;
+    public AtomsBuilder<T> set(T element, T replace) {
+        if (contains(element))
+            builder[indexOf(element)] = replace;
 
-        atoms[indexOf(element)] = replace;
-        return true;
+        return this;
     }
 
     /**
@@ -293,14 +321,13 @@ class Atoms<T> {
      *
      * @param element the element to replace
      * @param replace the replacement
-     * @return {@code true} if the list was modified
+     * @return the modified list
      */
-    public boolean setLast(T element, T replace) {
-        if (!contains(element)) return false;
+    public AtomsBuilder<T> setLast(T element, T replace) {
+        if (contains(element))
+            builder[lastIndexOf(element)] = replace;
 
-        atoms[lastIndexOf(element)] = replace;
-
-        return true;
+        return this;
     }
 
     // endregion
@@ -311,59 +338,64 @@ class Atoms<T> {
      * Removes the element at the specified index from the list.
      *
      * @param i the index of the element to remove from the list
-     * @return the removed element from this index
+     * @return the modified list
      */
-    public T remove(int i) {
-        T e = atoms[i];
-
+    public AtomsBuilder<T> remove(int i) {
         if (i != size() - 1)
-            System.arraycopy(atoms, i + 1, atoms, i, size() - i - 1);
+            System.arraycopy(builder, i + 1, builder, i, size() - i - 1);
 
         removeLast();
 
-        return e;
+        return this;
     }
 
     /**
      * Removes the first occurrence of the specified element from the list.
      *
      * @param e the element
+     * @return the modified list
      */
-    public void remove(T e) {
+    public AtomsBuilder<T> remove(T e) {
         if (contains(e))
             if (indexOf(e) != size() - 1)
-                System.arraycopy(atoms, indexOf(e) + 1, atoms, indexOf(e), size() - indexOf(e) - 1);
+                System.arraycopy(builder, indexOf(e) + 1, builder, indexOf(e), size() - indexOf(e) - 1);
 
         removeLast();
+
+        return this;
     }
 
     /**
      * Removes the last element of the list.
+     *
+     * @return the modified list
      */
-    public void removeLast() {
-        if (atoms.length > 0) atoms = Arrays.copyOf(atoms, atoms.length - 1);
+    public AtomsBuilder<T> removeLast() {
+        if (builder.length > 0) builder = Arrays.copyOf(builder, builder.length - 1);
+
+        return this;
     }
 
     /**
      * Removes the last occurrence of the specified element in the list.
+     *
+     * @return the modified list
      */
-    public void removeLast(T e) {
-        remove(lastIndexOf(e));
+    public AtomsBuilder<T> removeLast(T e) {
+        return remove(lastIndexOf(e));
     }
 
     /**
      * Removes all occurrences of the specified element from the list.
      *
      * @param e The element
-     * @return {@code true} if the list was modified
+     * @return the modified list
      */
-    public boolean removeAll(T e) {
-        if (!contains(e)) return false;
-
+    public AtomsBuilder<T> removeAll(T e) {
         while (contains(e))
             remove(e);
 
-        return true;
+        return this;
     }
 
     // endregion
