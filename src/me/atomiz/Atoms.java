@@ -29,6 +29,8 @@ class Atoms<T> {
         atoms = (T[]) list.toArray();
     }
 
+    // TODO: Create constructor which argument of type Atoms
+    
     // region basics
 
     /**
@@ -169,6 +171,9 @@ class Atoms<T> {
     /**
      * Prints each element of the list on a new line.
      */
+    //TODO: Instead of printing directly to the console, you can override toString method. Then the consumer of this library can decide where and how to print the result.
+    //Most of the time writing directly to the console is a bad practice. If you decide to use this library in a desktop application, you won't need to print into the console but into a UI component.
+    //In this scenarion should you create a separate method printlnToComponent or something like this?
     public void println() {
         for (T atom : atoms)
             System.out.println(atom);
@@ -196,6 +201,7 @@ class Atoms<T> {
      *
      * @param e the element
      */
+    //TODO: Why do you create a new array each time you add an element. What is the O notation for this operation? What should be in a perfect scenarion?
     public void add(T e) {
         atoms = Arrays.copyOf(atoms, atoms.length + 1);
         atoms[atoms.length - 1] = e;
@@ -207,6 +213,7 @@ class Atoms<T> {
      * @param index the index
      * @param e     the element
      */
+    //TODO: Same thing applies here
     public void add(int index, T e) {
         atoms = Arrays.copyOf(atoms, atoms.length + 1);
         System.arraycopy(atoms, index, atoms, index + 1, atoms.length - index - 1);
@@ -218,6 +225,7 @@ class Atoms<T> {
      *
      * @param e the {@link Arrays array} of elements
      */
+    //TODO: What is the O notation for this operation? What should be in a perfect scenarion?
     public void addAll(T[] e) {
         Arrays.stream(e).forEach(this::add);
     }
@@ -230,6 +238,8 @@ class Atoms<T> {
     public void addAll(@NotNull Collection<T> e) {
         e.forEach(this::add);
     }
+    
+    //TODO: How to concatenate two Atoms objects?
 
     /**
      * Inserts the elements of the specified {@link Arrays Array} to the list starting from the specified index.
@@ -281,6 +291,7 @@ class Atoms<T> {
      * @param replace the replacement
      * @return {@code true} if the list was modified
      */
+    //TODO: Instead of checking with contains, you can use indexOf directly. If there is no occurrence you will receive index -1, for which you can check in the if statement.
     public boolean set(T element, T replace) {
         if (!contains(element)) return false;
 
@@ -295,6 +306,7 @@ class Atoms<T> {
      * @param replace the replacement
      * @return {@code true} if the list was modified
      */
+    //TODO: Similar to the above TODO
     public boolean setLast(T element, T replace) {
         if (!contains(element)) return false;
 
