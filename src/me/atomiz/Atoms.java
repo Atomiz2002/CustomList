@@ -1,11 +1,8 @@
 package me.atomiz;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * A custom list with specified elements of a given type.
@@ -13,358 +10,458 @@ import java.util.function.Consumer;
  * @param <T> the type
  */
 class Atoms<T> {
-    T[] atoms;
+	private final static int RESIZE_THRESHOLD = 10;
+	private final int INITIAL_SIZE;
+	private T[] atoms;
+	private int size = 0;
 
-    @SuppressWarnings("unchecked")
-    public Atoms() {
-        this.atoms = (T[]) new Object[0];
-    }
+	public Atoms() {
+		INITIAL_SIZE = 0;
+		atoms = (T[]) new Object[0];
+	}
 
-    public Atoms(T[] array) {
-        atoms = array;
-    }
+	public Atoms(int size) {
+		INITIAL_SIZE = size;
+		atoms = (T[]) new Object[INITIAL_SIZE];
+	}
 
-    @SuppressWarnings("unchecked")
-    public Atoms(Collection<T> list) {
-        atoms = (T[]) list.toArray();
-    }
+	public Atoms(T[] array) {
+		INITIAL_SIZE = array.length;
+		size = array.length;
+		atoms = array;
+	}
 
-    // region basics
+	public Atoms(Collection<T> list) {
+		INITIAL_SIZE = list.size();
+		size = list.size();
+		atoms = (T[]) list.toArray();
+	}
 
-    /**
-     * Returns the amount of occurrences of the specified element in the list.
-     *
-     * @param e the element to count
-     * @return the amount
-     */
-    public int count(@NotNull T e) {
-        int size = 0;
-        for (T el : atoms)
-            if (Objects.equals(el, e))
-                size++;
+	public Atoms(Atoms<T> atoms) {
+		INITIAL_SIZE = atoms.size;
+		size = atoms.size;
+		this.atoms = atoms.atoms;
+	}
 
-        return size;
-    }
+	// region base
 
-    /**
-     * Checks whether the list contains the specified element.
-     *
-     * @param e the element
-     * @return {@code true} if the list contains the specified element
-     */
-    public boolean contains(@NotNull T e) {
-        for (T a : atoms)
-            if (Objects.equals(a, e))
-                return true;
+	/**
+	 * Returns the amount of occurrences of the specified element in the list.
+	 *
+	 * @param e the element to count
+	 * @return the amount
+	 */
+	public int count(T e) {
+		int count = 0;
+		for (int i = 0; i < size; i++) {
+			if (Objects.equals(atoms[i], e))
+				count++;
+		}
 
-        return false;
-    }
+		return count;
+	}
 
-    /**
-     * Returns the index of the first occurrence of the specified element in the list or -1 if the list does not contain the element.
-     *
-     * @param e the element
-     * @return the index of the element or -1
-     */
-    public int indexOf(T e) {
-        for (int i = 0; i < atoms.length; i++)
-            if (Objects.equals(atoms[i], e))
-                if (atoms[i].equals(e))
-                    return i;
+	/**
+	 * Returns the amount of elements meeting the filter.
+	 *
+	 * @param filter the filter to test for
+	 * @return the amount
+	 */
+	public int countIf(Predicate<T> filter) {
+		Objects.requireNonNull(filter);
+		int count = 0;
+		for (int i = 0; i < size; i++) {
+			if (filter.test(atoms[i]))
+				count++;
+		}
 
-        return -1;
-    }
+		return count;
+	}
 
-    /**
-     * Returns the index of the last occurrence of the specified element in the list or -1 if the list does not contain the element.
-     *
-     * @param e the element
-     * @return the last index of the element or -1
-     */
-    public int lastIndexOf(T e) {
-        for (int i = atoms.length - 1; i >= 0; i--)
-            if (Objects.equals(atoms[i], e))
-                return i;
+	/**
+	 * Checks whether the list contains the specified element.
+	 *
+	 * @param e the element
+	 * @return {@code true} if the list contains the specified element
+	 */
+	public boolean contains(T e) {
+		for (int i = 0; i < size; i++)
+			if (Objects.equals(atoms[i], e))
+				return true;
 
-        return -1;
-    }
+		return false;
+	}
 
-    /**
-     * Returns the element located at the specified index in the list.
-     *
-     * @param i the index
-     * @return the element
-     */
-    public T get(int i) {
-        return atoms[i];
-    }
+	/**
+	 * Returns the index of the first occurrence of the specified element in the list or -1 if the list does not contain the element.
+	 *
+	 * @param e the element
+	 * @return the index of the element or -1
+	 */
+	public int indexOf(T e) {
+		for (int i = 0; i < size; i++)
+			if (Objects.equals(atoms[i], e))
+				return i;
 
-    /**
-     * Returns the amount of elements stored in the list.
-     *
-     * @return the list size
-     */
-    public int size() {
-        return atoms.length;
-    }
+		return -1;
+	}
 
-    /**
-     * Returns {@code true} if the list has no elements.
-     *
-     * @return {@code true} if the list has no elements
-     */
-    public boolean isEmpty() {
-        return size() == 0;
-    }
+	/**
+	 * Returns the index of the last occurrence of the specified element in the list or -1 if the list does not contain the element.
+	 *
+	 * @param e the element
+	 * @return the last index of the element or -1
+	 */
+	public int lastIndexOf(T e) {
+		for (int i = size - 1; i >= 0; i--)
+			if (Objects.equals(atoms[i], e))
+				return i;
 
-    /**
-     * Clears the list.
-     */
-    @SuppressWarnings("unchecked")
-    public void clear() {
-        atoms = (T[]) new Object[0];
-    }
+		return -1;
+	}
 
-    /**
-     * Performs an action on each element.
-     *
-     * @param action the action
-     */
-    public void forEach(Consumer<? super T> action) {
-        Objects.requireNonNull(action);
-        for (T atom : atoms)
-            action.accept(atom);
-    }
+	/**
+	 * Returns the element located at the specified index in the list.
+	 *
+	 * @param i the index
+	 * @return the element
+	 */
+	public T get(int i) {
+		return atoms[i];
+	}
 
-    /**
-     * Retrieves the specified amount of elements starting from the specified index.
-     *
-     * @param start the start index (inclusive)
-     * @param count the end index (exclusive)
-     * @return the elements
-     */
-    public Atoms<T> getRange(int start, int count) {
-        Atoms<T> result = new Atoms<>();
-        for (int k = start; k < count; k++)
-            result.add(atoms[k]);
+	/**
+	 * Returns the amount of elements stored in the list.
+	 *
+	 * @return the list size
+	 */
+	public int size() {
+		return size;
+	}
 
-        return result;
-    }
+	/**
+	 * Returns {@code true} if the list has no elements.
+	 *
+	 * @return {@code true} if the list has no elements
+	 */
+	public boolean isEmpty() {
+		return size == 0;
+	}
 
-    /**
-     * Returns a list of the elements in the current list starting from the specified index and ending at the specified second index param.
-     *
-     * @param from the starting index (inclusive) of the sublist
-     * @param to   the ending index (exclusive) of the sublist
-     * @return the elements
-     */
-    public Atoms<T> subList(int from, int to) {
-        Atoms<T> result = new Atoms<>();
-        for (int k = from; k < to; k++)
-            result.add(atoms[k]);
+	/**
+	 * Clears the list.
+	 */
+	public void clear() {
+		size = 0;
+		atoms = (T[]) new Object[RESIZE_THRESHOLD];
+	}
 
-        return result;
-    }
+	/**
+	 * Performs an action on each element.
+	 *
+	 * @param action the action
+	 */
+	public void forEach(Consumer<? super T> action) {
+		Objects.requireNonNull(action);
+		Arrays.stream(atoms, 0, size).forEach(action);
+	}
 
-    /**
-     * Prints each element of the list on a new line.
-     */
-    public void println() {
-        for (T atom : atoms)
-            System.out.println(atom);
-    }
+	private void resize(int amount) {
+		if (amount > 0) {
+			if (size + amount > atoms.length)
+				atoms = Arrays.copyOf(atoms, Math.max(atoms.length << 1, RESIZE_THRESHOLD));
+		} else if (amount < 0) {
+			if (atoms.length >> 1 >= size + amount)
+				atoms = Arrays.copyOf(atoms, atoms.length << 1);
+		}
+	}
 
-    /**
-     * Prints each element of the list on a new line by replacing the empty values with the specified string.
-     *
-     * @param replacement The replacement
-     */
-    public void println(String replacement) {
-        for (T atom : atoms)
-            if (atom == null || atom.toString().isEmpty())
-                System.out.println(replacement);
-            else
-                System.out.println(atom);
-    }
+	// endregion
 
-    // endregion
+	// region add
 
-    // region add
+	/**
+	 * Adds the specified element to the list.
+	 *
+	 * @param e the element
+	 */
+	public void add(T e) {
+		resize(1);
+		atoms[size++] = e;
+	}
 
-    /**
-     * Adds the specified element to the list.
-     *
-     * @param e the element
-     */
-    public void add(T e) {
-        atoms = Arrays.copyOf(atoms, atoms.length + 1);
-        atoms[atoms.length - 1] = e;
-    }
+	/**
+	 * Inserts the specified element at the specified index in the list.
+	 *
+	 * @param index the index
+	 * @param e     the element
+	 */
+	public void add(int index, T e) {
+		resize(1);
+		System.arraycopy(atoms, index, atoms, index + 1, atoms.length - index - 1);
+		set(index, e);
+		size++;
+	}
 
-    /**
-     * Inserts the specified element at the specified index in the list.
-     *
-     * @param index the index
-     * @param e     the element
-     */
-    public void add(int index, T e) {
-        atoms = Arrays.copyOf(atoms, atoms.length + 1);
-        System.arraycopy(atoms, index, atoms, index + 1, atoms.length - index - 1);
-        set(index, e);
-    }
+	/**
+	 * Adds the elements of the specified {@link Arrays Array} to the list.
+	 *
+	 * @param e the {@link Arrays array} of elements
+	 */
+	public void addAll(T[] e) {
+		resize(e.length);
+		Arrays.stream(e).forEach(a -> atoms[size++] = a);
+	}
 
-    /**
-     * Adds the elements of the specified {@link Arrays Array} to the list.
-     *
-     * @param e the {@link Arrays array} of elements
-     */
-    public void addAll(T[] e) {
-        Arrays.stream(e).forEach(this::add);
-    }
+	/**
+	 * Adds the elements of the specified {@link Collection} to the list.
+	 *
+	 * @param e the {@link Collection Collection}
+	 */
+	public void addAll(Collection<T> e) {
+		e.forEach(this::add);
+	}
 
-    /**
-     * Adds the elements of the specified {@link Collection} to the list.
-     *
-     * @param e the {@link Collection Collection}
-     */
-    public void addAll(@NotNull Collection<T> e) {
-        e.forEach(this::add);
-    }
+	/**
+	 * Adds the elements of the specified {@link Arrays Array} to the list.
+	 *
+	 * @param e the {@link Arrays array} of elements
+	 */
+	public void addAll(Atoms<T> e) {
+		addAll(e.atoms);
+	}
 
-    /**
-     * Inserts the elements of the specified {@link Arrays Array} to the list starting from the specified index.
-     *
-     * @param index   the index
-     * @param element the element
-     */
-    public void addAll(int index, T[] element) {
-        atoms = Arrays.copyOf(atoms, atoms.length + element.length);
-        System.arraycopy(atoms, index, atoms, index + element.length, atoms.length - index - element.length);
+	/**
+	 * Inserts the elements of the specified {@link Arrays Array} to the list starting from the specified index.
+	 *
+	 * @param index    the index
+	 * @param elements the elements
+	 */
+	public void addAll(int index, T[] elements) {
+		resize(elements.length);
 
-        for (int j = 0; j < element.length; j++)
-            set(index + j, element[j]);
-    }
+		System.arraycopy(atoms, index, atoms, index + elements.length, atoms.length - index - elements.length);
+		System.arraycopy(elements, 0, atoms, index, elements.length);
 
-    /**
-     * Inserts the elements of the specified {@link Collection} to the list starting from the specified index.
-     *
-     * @param index      the index
-     * @param collection the collection to add
-     */
-    @SuppressWarnings("unchecked")
-    public void addAll(int index, Collection<T> collection) {
-        addAll(index, (T[]) collection.toArray());
-    }
+		size += elements.length;
+	}
 
-    // endregion
+	/**
+	 * Inserts the elements of the specified {@link Collection} to the list starting from the specified index.
+	 *
+	 * @param index      the index
+	 * @param collection the collection to add
+	 */
+	public void addAll(int index, Collection<T> collection) {
+		addAll(index, (T[]) collection.toArray());
+	}
 
-    // region set
+	/**
+	 * Inserts the elements of the specified {@link Collection} to the list starting from the specified index.
+	 *
+	 * @param index the index
+	 * @param atoms the collection to add
+	 */
+	public void addAll(int index, Atoms<T> atoms) {
+		List<T> a = new ArrayList<>();
+		atoms.forEach(a::add);
+		addAll(index, a);
+	}
 
-    /**
-     * Sets the element at the specified index to the specified element.
-     *
-     * @param index   the index
-     * @param element the element
-     * @return the element previously at this index
-     */
-    public T set(int index, T element) {
-        T prev = atoms[index];
-        atoms[index] = element;
+	// endregion
 
-        return prev;
-    }
+	// region set/replace
 
-    /**
-     * Sets the first occurrence of the specified element to the specified replacement element.
-     *
-     * @param element the element to replace
-     * @param replace the replacement
-     * @return {@code true} if the list was modified
-     */
-    public boolean set(T element, T replace) {
-        if (!contains(element)) return false;
+	/**
+	 * Sets the element at the specified index to the specified element.
+	 *
+	 * @param index   the index
+	 * @param element the element
+	 * @return the element previously at this index
+	 */
+	public T set(int index, T element) {
+		if (index < 0)
+			return null;
 
-        atoms[indexOf(element)] = replace;
-        return true;
-    }
+		T prev = atoms[index];
+		atoms[index] = element;
+		return prev;
+	}
 
-    /**
-     * Sets the last occurrence of the specified element to the specified replacement.
-     *
-     * @param element the element to replace
-     * @param replace the replacement
-     * @return {@code true} if the list was modified
-     */
-    public boolean setLast(T element, T replace) {
-        if (!contains(element)) return false;
+	/**
+	 * Replaces all occurrences of this element with the specified replacement.
+	 *
+	 * @param element the element to replace
+	 * @param replace the replacement
+	 * @return the amount of replaced occurrences
+	 */
+	private int replace(T element, T replace, boolean first) {
+		if (!contains(element))
+			return -1;
 
-        atoms[lastIndexOf(element)] = replace;
+		int index = first ? indexOf(element) : lastIndexOf(element);
+		atoms[index] = replace;
 
-        return true;
-    }
+		return index;
+	}
 
-    // endregion
+	/**
+	 * Replaces the first occurrence of this element with the specified replacement.
+	 *
+	 * @param element the element to replace
+	 * @param replace the replacement
+	 * @return the index of the replaced element
+	 */
+	public int replaceFirst(T element, T replace) {
+		return replace(element, replace, true);
+	}
 
-    // region remove
+	/**
+	 * Replaces the last occurrence of this element with the specified replacement.
+	 *
+	 * @param element the element to replace
+	 * @param replace the replacement
+	 * @return the index of the replaced element
+	 */
+	public int replaceLast(T element, T replace) {
+		return replace(element, replace, false);
+	}
 
-    /**
-     * Removes the element at the specified index from the list.
-     *
-     * @param i the index of the element to remove from the list
-     * @return the removed element from this index
-     */
-    public T remove(int i) {
-        T e = atoms[i];
+	/**
+	 * Replaces all occurrences of this element with the specified replacement.
+	 *
+	 * @param element     the element to replace
+	 * @param replacement the replacement
+	 * @return the amount of replaced occurrences
+	 */
+	public int replaceAll(T element, T replacement) {
+		if (!contains(element))
+			return -1;
 
-        if (i != size() - 1)
-            System.arraycopy(atoms, i + 1, atoms, i, size() - i - 1);
+		int amount = 0;
+		for (int i = 0; i < atoms.length; i++)
+			if (Objects.equals(atoms[i], element)) {
+				atoms[i] = replacement;
+				amount++;
+			}
 
-        removeLast();
+		return amount;
+	}
 
-        return e;
-    }
+	// endregion
 
-    /**
-     * Removes the first occurrence of the specified element from the list.
-     *
-     * @param e the element
-     */
-    public void remove(T e) {
-        if (contains(e))
-            if (indexOf(e) != size() - 1)
-                System.arraycopy(atoms, indexOf(e) + 1, atoms, indexOf(e), size() - indexOf(e) - 1);
+	// region remove
 
-        removeLast();
-    }
+	private boolean remove(T e, boolean first) {
+		int i = first ? indexOf(e) : lastIndexOf(e);
 
-    /**
-     * Removes the last element of the list.
-     */
-    public void removeLast() {
-        if (atoms.length > 0) atoms = Arrays.copyOf(atoms, atoms.length - 1);
-    }
+		if (i == -1)
+			return false;
 
-    /**
-     * Removes the last occurrence of the specified element in the list.
-     */
-    public void removeLast(T e) {
-        remove(lastIndexOf(e));
-    }
+		atoms[i] = null;
+		size--;
+		System.arraycopy(atoms, i + 1, atoms, i, size - i);
 
-    /**
-     * Removes all occurrences of the specified element from the list.
-     *
-     * @param e The element
-     * @return {@code true} if the list was modified
-     */
-    public boolean removeAll(T e) {
-        if (!contains(e)) return false;
+		resize(-1);
+		return true;
+	}
 
-        while (contains(e))
-            remove(e);
+	/**
+	 * Removes the first occurrence of the specified element from the list.
+	 *
+	 * @param e the element
+	 * @return {@code true} if the element was removed
+	 */
+	public boolean remove(T e) {
+		return remove(e, true);
+	}
 
-        return true;
-    }
+	/**
+	 * Removes the last occurrence of the specified element in the list.
+	 */
+	public boolean removeLast(T e) {
+		return remove(e, false);
+	}
 
-    // endregion
+	/**
+	 * Removes the last element of the list.
+	 */
+	public void removeLast() {
+		if (size == 0)
+			return;
+		atoms[--size] = null;
+		resize(-1);
+	}
+
+	/**
+	 * Removes all occurrences of the specified element from the list.
+	 *
+	 * @param e the element
+	 * @return the amount of removed elements
+	 */
+	public int removeAll(T e) {
+		if (!contains(e))
+			return 0;
+
+		int amount = 0;
+		for (; contains(e); amount++)
+			remove(e);
+
+		return amount;
+	}
+
+	/**
+	 * Removes all elements matching the specified condition.
+	 *
+	 * @param filter the condition
+	 * @return the amount of removed elements
+	 */
+	public int removeIf(Predicate<T> filter) {
+		Objects.requireNonNull(filter);
+		int i = 0;
+		for (; i < size; i++)
+			if (filter.test(atoms[i]))
+				remove(atoms[i--]);
+
+		return i;
+	}
+
+	// endregion
+
+	/**
+	 * Retrieves the specified amount of elements starting from the specified index.
+	 *
+	 * @param start the start index (inclusive)
+	 * @param count the end index (exclusive)
+	 * @return the elements
+	 */
+	public Atoms<T> getRange(int start, int count) {
+		Atoms<T> atoms = new Atoms<>();
+
+		for (int i = start; i < start + count; i++)
+			atoms.add(this.atoms[i]);
+
+		return atoms;
+	}
+
+	/**
+	 * Returns a list of the elements in the current list starting from the specified index and ending at the specified second index param.
+	 *
+	 * @param from the starting index (inclusive) of the sublist
+	 * @param to   the ending index (exclusive) of the sublist
+	 * @return the elements
+	 */
+	public Atoms<T> subList(int from, int to) {
+		Atoms<T> atoms = new Atoms<>();
+
+		for (int i = from; i < to; i++)
+			atoms.add(this.atoms[i]);
+
+		return atoms;
+	}
+
+	@Override
+	public String toString() {
+		return String.join("\n", Arrays.toString(atoms));
+	}
 }
